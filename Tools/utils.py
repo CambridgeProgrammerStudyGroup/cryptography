@@ -17,7 +17,7 @@ def nLetterGenerator(characters, n):
 def invert(table):
 	inverse = {}
 	for k,v in table.items():
-		if isinstance(v, str):
+		if isinstance(v, str) or isinstance(v, unicode):
 			inverse[v]=k
 		else:
 			try: # handle polysubstitution ciphers properly

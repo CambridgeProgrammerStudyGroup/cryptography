@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import sys
 import string
 import random
@@ -29,7 +30,7 @@ class Substitution(object):
 
 def Caesar(n, preserveAll=False):
 	def shift(c):
-		c = string.upper(c)
+		c = c.upper()
 		if c in string.letters:
 			base = ord('A')
 			return chr(base+((ord(c) - base)+n)%26)
@@ -42,7 +43,7 @@ def Caesar(n, preserveAll=False):
 
 def RandomSubstitution(preserveAll=False):
 	lettersLower = string.lowercase
-	lettersUpper = map(string.upper, lettersLower)
+	lettersUpper = lettersLower.upper()
 	randomised = sorted(lettersUpper, key=lambda x: random.random())
 	d1 = dict(zip(lettersLower, randomised))
 	d2 = dict(zip(lettersUpper, randomised))
@@ -62,13 +63,45 @@ class RandomPolysubstitution(object):
 		self.key = json.dumps(self.e_table)
 
 	def encrypt(self, plaintext):
-		xs = filter(lambda x: x in self.acceptable, string.upper(plaintext))
+		xs = filter(lambda x: x in self.acceptable, plaintext.upper())
 		return "".join(map(lambda c: self.e_transform(c), xs))
 
 	def decrypt(self, ciphertext):
 		bare = filter(lambda x: x in self.acceptable, ciphertext)
 		xs = utils.splitByN(bare, self.n)
 		return "".join(map(lambda c: self.d_transform(c), xs))
+
+class WithATwist(object):
+	def __init__(self):
+		# self.lower=u"aąbcćdeęfghijklłmnńoóprsśtuwyzźż"
+		self.upper=u"AĄBCĆDEĘFGHIJKLŁMNŃOÓPRSŚTUWYZŹŻ"
+		self.acceptable = set(self.upper)
+		bigrams = utils.nLetterGenerator(string.uppercase, 2)
+		self.e_table = dict(zip(self.acceptable, bigrams))
+		self.e_transform = utils.mkTransform(self.e_table)
+		self.d_table = utils.invert(self.e_table)
+		self.d_transform = utils.mkTransform(self.d_table)
+		self.key = json.dumps(self.e_table)
+
+	def encrypt(self, plaintext):
+		pt = plaintext.decode('utf-8').upper()
+		xs = filter(lambda x: x in self.acceptable, pt)
+		ciphertext = "".join(map(lambda c: self.e_transform(c), xs))
+		return ciphertext
+
+	def decrypt(self, ciphertext):
+		bare = filter(lambda x: x in string.uppercase, unicode(ciphertext))
+		xs = utils.splitByN(bare, 2)
+		return "".join(map(lambda c: self.d_transform(c), xs))
+
+	def loadKey(self, table):
+		self.e_table = table
+		self.e_transform = utils.mkTransform(self.e_table)
+		self.d_table = utils.invert(self.e_table)
+		self.d_transform = utils.mkTransform(self.d_table)
+		self.key = json.dumps(self.e_table)
+		
+
 
 
 if __name__ == "__main__":
@@ -83,6 +116,7 @@ if __name__ == "__main__":
 		('shuffle',			lambda: RandomSubstitution()),
 		('shuffle-keep',	lambda: RandomSubstitution(preserveAll=True)),
 		('random-poly', 	lambda num_chars: RandomPolysubstitution(int(num_chars))),
+		('eastern-twist',	lambda: WithATwist())
 	]
 
 	def showCiphers(ciphers):
@@ -97,36 +131,42 @@ if __name__ == "__main__":
 	parser.add_argument('--save-key FILENAME', dest="save_key", help="Save the key into a file in a json format")
 	parser.add_argument('--plaintext FILENAME', dest="plainfile", help="Select a plaintext file to encrypt. Output will be on STDOUT")
 	parser.add_argument('--noblock', dest="noblock", action="store_true", help="Stop block output formatting")
+	parser.add_argument('--load-key', dest="keyfile", help="Load a key to decrypt")
+	parser.add_argument('--ciphertext FILNAME', dest="ciphertext", help="The file to be decrypted" )
 	args = parser.parse_args()
+
+	if args.show_ciphers:
+		showCiphers(ciphers)
+		sys.exit()
 
 	if not args.cipher:
 		print "We can't proceed without a cipher."
 		showCiphers(ciphers)
 		sys.exit()
 
-	if args.show_ciphers:
-		showCiphers(ciphers)
-		sys.exit()
-
+	# Build the Cipher
 	constructor = dict(ciphers)[args.cipher]
-
 	expected_options = len(inspect.getargspec(constructor).args)
 	if expected_options > 0 and (not args.options or not len(args.options) == expected_options):
 		print "Insufficent options for cipher."
 		showCiphers(ciphers)
 		sys.exit()
-
 	cipher = constructor(*args.options) if args.options else constructor()
 
-	if not args.plainfile:
-		print "You didn't specify a file to encrypt"
-		sys.exit()
+	if args.plainfile:
+		with open(args.plainfile) as inFile:
+			if args.noblock:
+				print cipher.encrypt(inFile.read().decode('utf-8'))
+			else:
+				print utils.blockFormat(cipher.encrypt(inFile.read()))
 
-	with open(args.plainfile) as inFile:
-		if args.noblock:
-			print cipher.encrypt(inFile.read())
-		else:
-			print utils.blockFormat(cipher.encrypt(inFile.read()))
+	if args.keyfile and args.ciphertext:
+		with open(args.keyfile) as kf:
+			key = json.load(kf)
+			cipher.loadKey(key)
+		with open(args.ciphertext) as ct:
+			ciphertext = ct.read().decode('utf-8')
+			print cipher.decrypt(ciphertext)
 
 	if args.save_key:
 		with open(args.save_key, "w") as kf:
