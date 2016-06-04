@@ -1,4 +1,6 @@
 import string
+import random
+import itertools
 
 def splitByN(seq, n):
 	return [seq[i:i+n] for i in range(0, len(seq), n)]
@@ -7,6 +9,10 @@ def blockFormat(text, blockwidth=5, blocks=8):
 	text=text.upper()
 	letters = set(string.uppercase)
 	return "\n".join(map(lambda x: " ".join(x), splitByN(splitByN(filter(lambda c: c in letters, text), blockwidth), blocks)))
+
+def nLetterGenerator(characters, n):
+	strings = map(lambda x: "".join(x), itertools.combinations(characters, n))
+	return sorted(strings, key=lambda x: random.random())
 
 def invert(table):
 	inverse = {}
