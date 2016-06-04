@@ -34,7 +34,7 @@ def mkTransform(table):
 	"""
 	def substitute(p):
 		subs = table[p]
-		if isinstance(subs, str):
+		if isinstance(subs, str) or isinstance(subs, unicode):
 			return subs
 		else:
 			try:
