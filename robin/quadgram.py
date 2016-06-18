@@ -63,12 +63,12 @@ def get_quadgrams(chars):
         else:
             continue
 
-        if len(seq) == 4:
-            seq = seq[1:]
-
         seq = seq + ch
 
-        if '.' not in seq:
+        if len(seq) > 4:
+            seq = seq[-4:]
+
+        if len(seq) == 4 and '.' not in seq:
             yield seq
 
 
