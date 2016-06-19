@@ -2,13 +2,14 @@
 
 import random
 import string
-from quadgram import Scorer
+from ngram import NGramSet
 
+QUADGRAMS = NGramSet.make_pretrained(4)
+UNIGRAMS = NGramSet.make_pretrained(1)
 
 ALPHABET = list(string.uppercase)
 
-ENGLISH_FREQUENCY = ['E', 'T', 'A', 'O', 'N', 'I', 'H', 'S', 'R', 'D', 'L', 'U', 'M',
-                     'W', 'C', 'F', 'Y', 'G', 'B', 'P', 'V', 'K', 'X', 'J', 'Q', 'Z']
+ENGLISH_FREQUENCY = sorted(ALPHABET, key=lambda ch: -UNIGRAMS.freq(ch))
 
 DEBUG = False
 
@@ -57,16 +58,16 @@ def order_by_frequency(chars):
 # small random changes to see if they improve the result until we can't seem
 # to improve it any more. See
 # http://practicalcryptography.com/cryptanalysis/stochastic-searching/cryptanalysis-simple-substitution-cipher/
-def solve(text, scorer=None):
-    if scorer is None:
-        scorer = Scorer.make_pretrained()
+def solve(text, ngram_set=None):
+    if ngram_set is None:
+        ngram_set = QUADGRAMS
 
     def get_improvement(key):
-        score = scorer.score(decrypt(key, text))
+        score = ngram_set.score(decrypt(key, text))
         if DEBUG: print score
         for _ in range(1000):
             new_key = change_key(key)
-            new_score = scorer.score(decrypt(new_key, text))
+            new_score = ngram_set.score(decrypt(new_key, text))
             if new_score > score:
                 return new_key
         return None
