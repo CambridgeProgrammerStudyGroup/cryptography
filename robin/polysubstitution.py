@@ -1,8 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from substitution import SubstitutionSolver, ALPHABET
+import string
+import codecs
 
+from substitution import SubstitutionSolver
+from ngram import NGramSet
+
+ALPHABET = list(string.uppercase)
 
 def get_letters(chars):
     for ch in chars:
@@ -63,10 +68,10 @@ class PolySubstitutionSolver(SubstitutionSolver):
             if len(ch) == self.token_length and ch[0] in ALPHABET:
                 cipher_tokens.add(ch)
 
-        if len(cipher_tokens) > len(ALPHABET):
+        if len(cipher_tokens) > len(self.ngram_set.valid_letters):
             raise Exception("Too many (%d) tokens in cipher alphabet" % len(cipher_tokens))
 
-        for i in range(len(ALPHABET) - len(cipher_tokens)):
+        for i in range(len(self.ngram_set.valid_letters) - len(cipher_tokens)):
             cipher_tokens.add("dummy-%02d" % i)
 
         return cipher_tokens
@@ -80,15 +85,16 @@ if __name__ == '__main__':
             text = f.read()
         for period in range(1, 20):
             print "%3d\t%04f" % (period, get_index_of_coincidence(text, period))
-    elif len(sys.argv) == 3:
+    elif len(sys.argv) == 4:
         token_length = int(sys.argv[1])
-        solver = PolySubstitutionSolver(token_length)
-        with open(sys.argv[2]) as f:
+        lang = sys.argv[2]
+        solver = PolySubstitutionSolver(token_length, NGramSet.make_pretrained(4, lang))
+        with open(sys.argv[3]) as f:
             text = f.read()
         key, plaintext = solver.solve(text)
         print key
-        print plaintext
+        print codecs.encode(plaintext, 'utf-8')
     else:
         print >>sys.stderr, "Usage:"
         print >>sys.stderr, "    %s filename" % sys.argv[0]
-        print >>sys.stderr, "    %s token_length filename" % sys.argv[0]
+        print >>sys.stderr, "    %s token_length lang filename" % sys.argv[0]

@@ -1,21 +1,30 @@
 from collections import defaultdict
 from math import log
+import string
+import codecs
+
+UTF8 = 'utf-8'
 
 class NGramSet(object):
-    def __init__(self, n):
+    def __init__(self, n, valid_letters):
         self.total = 0
         self.freqs = defaultdict(int)
         self.n = n
+        self.valid_letters = valid_letters
 
     @classmethod
-    def make_pretrained(cls, n=4, filename=None):
+    def make_pretrained(cls, n=4, lang='en', filename=None):
 
         if filename is None:
             from os.path import dirname, join
-            filename = join(dirname(__file__), "%d-gram_freqs.txt" % n)
+            if lang == 'en':
+                leafname = "%d-gram_freqs.txt" % n
+            else:
+                leafname = "%d-gram_freqs-%s.txt" % (n, lang)
+            filename = join(dirname(__file__), leafname)
 
-        scorer = cls(n)
-        with open(filename) as f:
+        scorer = cls(n, set())
+        with codecs.open(filename, 'r', UTF8) as f:
             for line in f:
                 if not line.startswith('#'):
                     parts = line.split()
@@ -24,10 +33,11 @@ class NGramSet(object):
                     assert len(seq) == n
                     scorer.freqs[seq] = count
                     scorer.total += count
+                    scorer.valid_letters.update(seq)
         return scorer
 
     def populate(self, chars):
-        for seq in get_ngrams(chars, self.n):
+        for seq in get_ngrams(chars, self.n, self.valid_letters):
             self.total += 1
             self.freqs[seq] += 1
 
@@ -52,22 +62,33 @@ class NGramSet(object):
             p += log(count / divisor)
         return p
 
+    def get_letters_by_frequency(self):
+        letter_freqs = defaultdict(int)
+        for seq, freq in self.freqs.iteritems():
+            for ch in seq:
+                letter_freqs[ch] += freq
+        letters = list(self.valid_letters)
+        letters.sort(key=lambda ch: -letter_freqs[ch])
+        return letters
+
 
 def read_filechars(filename):
-    with open(filename) as f:
+    with codecs.open(filename, 'r', 'utf-8-sig') as f:
         while True:
             ch = f.read(1)
             if not ch: break
             yield ch
 
 
-def get_ngrams(chars, n):
-    seq = ""
+def get_ngrams(chars, n, valid_letters=None):
+    seq = u""
     for ch in chars:
         if ch.isdigit():
             ch = '.'
         elif ch.isalpha():
             ch = ch.upper()
+            if valid_letters and ch not in valid_letters:
+                ch = '.'
         else:
             continue
 
@@ -84,15 +105,27 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) < 2:
-        print >>sys.stderr, "Usage %s n [file...]" % sys.argv[0]
+        print >>sys.stderr, "Usage %s [--alphabet file] n [file...]" % sys.argv[0]
         sys.exit(1)
 
-    ngram_set = NGramSet(int(sys.argv[1]))
+    args = sys.argv[1:]
 
-    for filename in sys.argv[2:]:
-        scorer.populate_from_file(filename)
+    if args[0] != '--alphabet':
+        valid_letters = set(string.uppercase)
+    else:
+        valid_letters = set()
+        with codecs.open(args[1], 'r', 'utf-8-sig') as f:
+            for ch in f.read():
+                if ch.isalpha():
+                    valid_letters.add(ch.upper())
+        args = args[2:]
 
-    ngrams = list(scorer.freqs.keys())
+    ngram_set = NGramSet(int(args[0]), valid_letters)
+
+    for filename in args[1:]:
+        ngram_set.populate_from_file(filename)
+
+    ngrams = list(ngram_set.freqs.keys())
     ngrams.sort()
     for ngram in ngrams:
-        sys.stdout.write("%s\t%d\n" % (ngram, scorer.freqs[ngram]))
+        sys.stdout.write("%s\t%d\n" % (codecs.encode(ngram, UTF8), ngram_set.freqs[ngram]))

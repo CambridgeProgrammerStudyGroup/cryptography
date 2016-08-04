@@ -4,16 +4,9 @@ import random
 import string
 from ngram import NGramSet
 
-QUADGRAMS = NGramSet.make_pretrained(4)
-UNIGRAMS = NGramSet.make_pretrained(1)
-
-ALPHABET = list(string.uppercase)
-
-ENGLISH_FREQUENCY = sorted(ALPHABET, key=lambda ch: -UNIGRAMS.freq(ch))
-
 
 class SubstitutionSolver(object):
-    def __init__(self, ngram_set=QUADGRAMS):
+    def __init__(self, ngram_set):
         self.ngram_set = ngram_set
         self.debug = False
 
@@ -55,13 +48,15 @@ class SubstitutionSolver(object):
         l.sort()
         l.reverse()
         ordered_by_frequency = [ch for (_, ch) in l]
+        corpus_frequency = self.ngram_set.get_letters_by_frequency()
 
-        rev_table = dict(zip(ENGLISH_FREQUENCY, ordered_by_frequency))
-        return map(rev_table.get, ALPHABET)
+        rev_table = dict(zip(corpus_frequency, ordered_by_frequency))
+        return map(rev_table.get, sorted(self.ngram_set.valid_letters))
 
     def decrypt(self, key, ciphertext):
-        table = dict(zip(key, ALPHABET))
-        return ''.join(table.get(ch, ch) for ch in ciphertext)
+        alphabet = sorted(self.ngram_set.valid_letters)
+        table = dict(zip(key, alphabet))
+        return u''.join(table.get(ch, ch) for ch in ciphertext)
 
     def change_key(self, old_key):
         key = list(old_key)
@@ -73,13 +68,13 @@ class SubstitutionSolver(object):
         return text.upper()
 
     def get_cipher_alphabet(self, ciphertext):
-        return ALPHABET
+        return list(self.ngram_set.valid_letters)
 
 
 if __name__ == "__main__":
     import sys
     if len(sys.argv) == 2:
-        solver = SubstitutionSolver()
+        solver = SubstitutionSolver(NGramSet.make_pretrained(4, 'en'))
         with open(sys.argv[1]) as f:
             text = f.read()
         key, plaintext = solver.solve(text)
