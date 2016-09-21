@@ -18,6 +18,14 @@ This repository is for all the work done on Cryptography as part of the [Cambrid
  - [Set of modern crypto challenges](http://cryptopals.com/)
  - [Thorough speed test of common crypto libraries](https://panthema.net/2008/0714-cryptography-speedtest-comparison/) Note well, this excludes the more recent [NaCl](https://nacl.cr.yp.to/) and [NSS](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS).
 
+
+## Using OpenSSL from C
+
+The OpenSSL library will have all the functionality we might need during the challenges, especially if you're working in C/C++. The documentation is really poor though. Here are a couple of examples to get you started:
+
+ - [Good example of use](http://stackoverflow.com/questions/38342326/aes-256-encryption-with-openssl-library-using-ecb-mode-of-operation) in a stackoverflow question. (note the code has an issue, but it's easily fixed.)
+ - [Usage example from the official docs](https://www.openssl.org/docs/manmaster/crypto/EVP_EncryptInit.html) at the bottom of the page. Note that the cipher `EVP_aes_128_ecb()` is not documented but is available.
+
 ## Command Line help
 
 ### Strings and Hexadecimal
