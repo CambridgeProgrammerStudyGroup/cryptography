@@ -24,40 +24,52 @@ This repository is for all the work done on Cryptography as part of the [Cambrid
 
 Using `xxd` to convert a string to Hexadecimal. Note how we use `echo`'s `-n` option to not print a newline at the end.
 
-    ➤ echo -n "Hello" | xxd -p
-    48656c6c6f
+```bash
+ ➤ echo -n "Hello" | xxd -p
+ 48656c6c6f
+```
 
 Converting hex back to string (which will not include a newline):
 
-    ➤ echo -n "48656c6c6f" | xxd -p -r
-    Hello
+```bash
+ ➤ echo -n "48656c6c6f" | xxd -p -r
+ Hello
+ ```
 
 ### Strings and base 64
 
 Same idea, but for base 64:
 
-    ➤ echo -n "Hello" | base64
-    SGVsbG8=
-    ➤ echo -n "SGVsbG8=" | base64 --decode
-    Hello
+```bash
+➤ echo -n "Hello" | base64
+SGVsbG8=
+➤ echo -n "SGVsbG8=" | base64 --decode
+Hello
+```
 
 ### Using OPENSSL to test your code on the command line
 
 Let's set up our key and plaintext
 
-    ➤ PLAINTEXT="YELLOWFIN TUNAS." # Exactly 16 characters (128 bits)
-    ➤ KEY="YELLOW SUBMARINE" # Exactly 16 characters (128 bits)
-    ➤ HEX_KEY=$(echo $KEY | xxd -p)
+```bash
+➤ PLAINTEXT="YELLOWFIN TUNAS." # Exactly 16 characters (128 bits)
+➤ KEY="YELLOW SUBMARINE" # Exactly 16 characters (128 bits)
+➤ HEX_KEY=$(echo $KEY | xxd -p)
+```
 
 Then we can encrypt and decrypt using openssl. We'll need to tell openssl to **not add a salt and to not pad our plaintext** using the `-nopad` and `-nosalt` option. We'll use `-aes-128-ecb` as a simple test.
 
-    ➤ CIPHERTEXT=$(echo -n ${PLAINTEXT} | openssl enc -aes-128-ecb -nopad -nosalt -K ${HEX_KEY} )
-    ➤ echo -n ${CIPHERTEXT} | openssl enc -d -aes-128-ecb -nopad -nosalt -K ${HEX_KEY}
-    YELLOWFIN TUNAS.
+```bash
+➤ CIPHERTEXT=$(echo -n ${PLAINTEXT} | openssl enc -aes-128-ecb -nopad -nosalt -K ${HEX_KEY} )
+➤ echo -n ${CIPHERTEXT} | openssl enc -d -aes-128-ecb -nopad -nosalt -K ${HEX_KEY}
+YELLOWFIN TUNAS.
+```
 
 Using a file is just as easy:
 
-    ➤  base64 --decode < secret-lyrics.txt | openssl enc -d -aes-128-ecb -nopad -nosalt -K $(echo -n "YELLOW SUBMARINE" | xxd -p)
-    I'm back and I'm ringin' the bell
-    [...many more lines...]
-    Play that funky music
+```bash
+➤  base64 --decode < secret-lyrics.txt | openssl enc -d -aes-128-ecb -nopad -nosalt -K $(echo -n "YELLOW SUBMARINE" | xxd -p)
+I'm back and I'm ringin' the bell
+[...many more lines...]
+Play that funky music
+```
