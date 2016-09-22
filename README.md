@@ -15,7 +15,7 @@ This repository is for all the work done on Cryptography as part of the [Cambrid
  - [Block ciphers modes of operation](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)
  - The [notes in the Libtomcrypt library](https://github.com/libtom/libtomcrypt/tree/develop/notes) contain test vectors, and many practical implementation guidelines. The Libtomcrypt code also seems to be beginner friendly.
  - [Clear explanation of the Padding Oracle Attack with examples](http://robertheaton.com/2013/07/29/padding-oracle-attack/)
- - [Set of modern crypto challenges](http://cryptopals.com/)
+ - [Cryptopals challenges](http://cryptopals.com/)
  - [Thorough speed test of common crypto libraries](https://panthema.net/2008/0714-cryptography-speedtest-comparison/) Note well, this excludes the more recent [NaCl](https://nacl.cr.yp.to/) and [NSS](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS).
 
 
