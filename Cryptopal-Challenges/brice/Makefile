@@ -41,11 +41,11 @@ test: $(TEST_DIR) $(TESTS_EXE)
 
 run-tests : test
 	@echo "\n============= BEGIN TESTS =============\n"
-	@find $(TEST_DIR) -name "test*" -type file -exec {} \;
+	@find $(TEST_DIR) -name "test*" -type file -print0 | xargs -0 -n1 -I% sh -c %
 
 run-challenges : $(CHALLENGES_EXE)
 	@echo "\n============= BEGIN CHALLENGES =============\n"
-	@find $(BUILD_DIR) -name "Challenge-*" -type file -exec {} \;
+	@find $(BUILD_DIR) -name "Challenge-*" -type file -print0 | xargs -0 -n1 -I% sh -c %
 
 
 lib: $(BUILD_DIR)/cryptolib.a
