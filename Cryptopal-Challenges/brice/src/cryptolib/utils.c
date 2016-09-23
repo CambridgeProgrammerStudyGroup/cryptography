@@ -41,19 +41,23 @@ ERROR fromHex(
   const int raw_limit,
   OUT int* out_length
 ){
+  /* input should consist of entire bytes. */
   if((hex_length%2) != 0){return BAD_INPUT;}
+
   int raw_index = 0;
   for (int i = 0; i < (hex_length-1); i+=2){
 
+    /* input should be exclusively hex characters */
     if(!isHex(hex[i]) || !isHex(hex[i+1])){ return BAD_INPUT; }
 
     char aByte[3] = {hex[i],hex[i+1],0};
     long c = strtol(aByte, NULL, 16);
 
+    /* We don't have enough space to write the output */
     if(raw_index>raw_limit){ return LIMIT_TOO_SMALL; }
+
     raw[raw_index] = (char) c;
     raw_index++;
-
   }
 
   return OK;
