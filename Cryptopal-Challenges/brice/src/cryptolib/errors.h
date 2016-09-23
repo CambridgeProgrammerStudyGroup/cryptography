@@ -3,6 +3,7 @@
 
 typedef enum {
   OK,
+  BAD_INPUT,
   OPENSSL_ERROR,
   IV_PROVIDED_IN_ERROR,
   LIMIT_TOO_SMALL,

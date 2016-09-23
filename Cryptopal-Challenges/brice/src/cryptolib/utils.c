@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "common.h"
 #include "errors.h"
@@ -28,6 +29,15 @@ ERROR toHex(
   OUT int* out_length
 );
 
+bool isHex(c){
+  return ('0' <= c && c <= '9') || ( 'A' <= c && c <= 'F' ) || ('a' <= c && c <= 'f');
+}
+
+
+/**
+ * Limitations: Won't handle badly formatted input properly.
+ * bad input is not unsafe.
+ */
 ERROR fromHex(
   const unsigned char* hex,
   const int hex_length,
@@ -37,12 +47,15 @@ ERROR fromHex(
 ){
   int raw_index = 0;
   for (int i = 0; i < (hex_length-1); i+=2){
-    // grab two hex chars from string
+
+    if(!isHex(hex[i]) || !isHex(hex[i+1])){ return BAD_INPUT; }
+
     char aByte[3] = {hex[i],hex[i+1],0};
     long c = strtol(aByte, NULL, 16);
 
     if(raw_index>raw_limit){ return LIMIT_TOO_SMALL; }
     raw[raw_index] = (char) c;
+    raw_index++;
 
   }
   return OK;
