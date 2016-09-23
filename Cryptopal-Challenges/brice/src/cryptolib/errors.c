@@ -13,8 +13,8 @@ static ErrorMessage Errors[] = {
   {OK, "Everything OK"},
   {BAD_INPUT, "Bad input provided to function."},
   {OPENSSL_ERROR, "Caught openssl exception"},
-  {IV_PROVIDED_IN_ERROR, "IV was provided for a block cipher mode that doesn't need it."},
-  {LIMIT_TOO_SMALL, "Size limit of output buffer was too small. Try again with a bigger buffer."},
+  {IV_PROVIDED_IN_ERROR, "IV provided while not needed."},
+  {LIMIT_TOO_SMALL, "Size limit of output buffer was too small."},
   {UNKNOWN_FATAL, "Fatal unknown error occured."},
   {OK, NULL}
 

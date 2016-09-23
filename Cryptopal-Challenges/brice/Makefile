@@ -22,12 +22,12 @@ TEST_DIR=./test_build
 CRYPTOLIB_SRC=$(wildcard src/cryptolib/*.c)
 CRYPTOLIB_OBJ=$(patsubst src/cryptolib/%.c,$(BUILD_DIR)/%.o,$(CRYPTOLIB_SRC))
 CHALLENGES_SRC=$(wildcard src/Challenges/Challenge-*.c)
-CHALLENGES_EXE=$(patsubst src/Challenges/%.c,%.exe,$(CHALLENGES_SRC))
+CHALLENGES_EXE=$(patsubst src/Challenges/%.c,$(BUILD_DIR)/%.exe,$(CHALLENGES_SRC))
 
 TESTS_SRC=$(wildcard test/test_*.c)
 TESTS_EXE=$(patsubst test/%.c,$(TEST_DIR)/%,$(TESTS_SRC))
 
-main: $(CHALLENGES_EXE)
+main: run-tests run-challenges
 
 print-%  : ; @echo $* = $($*)
 
@@ -37,23 +37,24 @@ $(BUILD_DIR):
 $(TEST_DIR):
 	mkdir -p $@
 
-test: $(TEST_DIR) $(TESTS_EXE)
+tests: $(TEST_DIR) $(TESTS_EXE)
 
-run-tests : test
+test : tests
 	@echo "\n============= BEGIN TESTS =============\n"
-	@find $(TEST_DIR) -name "test*" -type file -print0 | xargs -0 -n1 -I% sh -c %
+	@find $(TEST_DIR) -name "test*" -type file -print0 | xargs -0 -n1 -I% sh -c "% && echo ''"
+	@echo "\n============= END TESTS =============\n"
 
-run-challenges : $(CHALLENGES_EXE)
+challenges : $(CHALLENGES_EXE)
 	@echo "\n============= BEGIN CHALLENGES =============\n"
-	@find $(BUILD_DIR) -name "Challenge-*" -type file -print0 | xargs -0 -n1 -I% sh -c %
-
+	@find $(BUILD_DIR) -name "Challenge-*" -type file -print0 | xargs -0 -n1 -I% sh -c "% && echo ''"
+	@echo "\n============= END CHALLENGES =============\n"
 
 lib: $(BUILD_DIR)/cryptolib.a
 
 $(TEST_DIR)/% : test/%.c test/common.c $(BUILD_DIR)/cryptolib.a
 	$(CC) $(CCOPTS) $(CFLAGS) $^ -o $@  $(LIBS) $(LDFLAGS) $(INCLUDES)
 
-Challenge-%.exe : src/Challenges/Challenge-%.c $(BUILD_DIR)/cryptolib.a
+$(BUILD_DIR)/Challenge-%.exe : src/Challenges/Challenge-%.c test/common.c $(BUILD_DIR)/cryptolib.a
 	$(CC) $(CCOPTS) $(CFLAGS) $^ -o $@  $(LIBS) $(LDFLAGS) $(INCLUDES)
 
 $(BUILD_DIR)/cryptolib.a: $(CRYPTOLIB_OBJ)

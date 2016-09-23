@@ -13,9 +13,6 @@ typedef struct {
 } Test ;
 
 
-#define FAIL 1;
-#define SUCCESS 0;
-
 int test_utils_fromHex(void){
   Test tests[] = {
     {"00", "\x00", OK},
@@ -41,25 +38,65 @@ int test_utils_fromHex(void){
     status = fromHex(in, strlen(in), (bytes) buffer, 256, &len);
 
     if(status != expected_status){
-      printf("    FAIL: h(%s) unexpected status (got=%s, expected=%s)\n", in, error_string(status), error_string(expected_status));
-      printf("        got:      x(");print_hex((const bytes) buffer);printf(")%lu \n",strlen(buffer));
+      printf("    FAIL: in(%s) unexpected status (got=%s, expected=%s)\n", in, error_string(status), error_string(expected_status));
+      printf("        got:      out(");print_hex((const bytes) buffer);printf(")%lu \n",strlen(buffer));
       test_status = FAIL;
     }else if((strcmp(expected, buffer) !=0) || (strlen(expected) != strlen(buffer))){
-      printf("    FAIL: h(%s)\n", in);
-      printf("        expected: x(");print_hex(expected);printf(")%lu\n", strlen(expected));
-      printf("        got:      x(");print_hex((const bytes) buffer);printf(")%lu \n",strlen(buffer));
+      printf("    FAIL: in(%s)\n", in);
+      printf("        expected: out(");print_hex(expected);printf(")%lu\n", strlen(expected));
+      printf("        got:      out(");print_hex((const bytes) buffer);printf(")%lu \n",strlen(buffer));
       test_status = FAIL;
     }else{
-      printf("    pass: h(%s)\n", in);
+      printf("    pass: in(%s)\n", in);
     }
-
   }
+  printf("\n");
   return test_status;
 }
 
+int test_utils_toBase64(void){
+  Test tests[] = {
+    {"", "", OK},
+    {"\x01\x01\x01", "AQEB", OK},
+    {"pleasure.", "cGxlYXN1cmUu", OK},
+    {"leasure.", "bGVhc3VyZS4=", OK},
+    {"easure.", "ZWFzdXJlLg==", OK},
+    {NULL, NULL}
+  };
+  int test_status = SUCCESS;
+
+  printf("TESTING: toBase64()\n");
+  for (int i = 0; tests[i].in != NULL; i++){
+    ERROR status = OK;
+    const bytes in = (const bytes) tests[i].in;
+    const bytes expected = (const bytes) tests[i].expected;
+    ERROR expected_status = tests[i].status;
+    char buffer[256] = {0};
+    int len = 0;
+
+    status = toBase64(in, strlen(in), (bytes) buffer, 256, &len);
+
+    if(status != expected_status){
+      printf("    FAIL: in(");print_hex(in);printf(") unexpected status (got=%s, expected=%s)\n", error_string(status), error_string(expected_status));
+      printf("        got:      out(%s)%lu\n", buffer,strlen(buffer));
+      test_status = FAIL;
+    }else if((strcmp(expected, buffer) !=0) || (strlen(expected) != strlen(buffer))){
+      printf("    FAIL: in(");print_hex(in);printf(")\n");
+      printf("        expected: out(%s)%lu\n", expected, strlen(expected));
+      printf("        got:      out(%s)%lu\n", buffer, strlen(buffer));
+      test_status = FAIL;
+    }else{
+      printf("    pass: in(");print_hex(in);printf(")\n");
+    }
+  }
+  printf("\n");
+  return test_status;
+
+}
 
 
 int main(){
-  return test_utils_fromHex();
-    // || test_utils_toBase64();
+  printf("=== [TEST]: test cryptolib/utils.c ===\n");
+  return test_utils_fromHex()
+    | test_utils_toBase64();
 }

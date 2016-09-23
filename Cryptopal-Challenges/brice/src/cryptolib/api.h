@@ -87,4 +87,11 @@ ERROR fromHex(
   OUT int* out_length
 );
 
+ERROR xor(
+  const bytes A,
+  const bytes B,
+  const int len,
+  OUT bytes out
+);
+
 #endif
