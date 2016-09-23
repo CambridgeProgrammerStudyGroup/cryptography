@@ -1,6 +1,9 @@
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
-#include "common.h"
+#include "../utils.h"
+#include "../cryptolib/api.h"
 
 int main(){
   ERROR status = OK;
@@ -10,13 +13,13 @@ int main(){
     MODE_ECB(),
     RIJNDAEL_128_128(),
     PKCS7(),
-    "YELLOW SUBMARINE",
-    "I AM AN INIT VEC"
+    (const bytes) "YELLOW SUBMARINE",
+    (const bytes) "I AM AN INIT VEC"
   );
 
 
-  unsigned char original[] = "My big secret";
-  int original_length = strlen(original);
+  bytes original = (bytes)"My big secret";
+  int original_length = strlen((char *)original);
 
   int ciphertext_limit = 64;
   unsigned char ciphertext[ciphertext_limit];

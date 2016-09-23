@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "utils.h"
+// #include "utils.h"
 
 void print_hex(const unsigned char *s){
   while(*s)
-    printf("%02x ", (unsigned int) *s++);
+    printf("%02x", (unsigned int) *s++);
 }
 
 long read_to_buffer(const char* filename, unsigned char** buffer){
