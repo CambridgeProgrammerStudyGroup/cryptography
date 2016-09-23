@@ -34,10 +34,6 @@ bool isHex(c){
 }
 
 
-/**
- * Limitations: Won't handle badly formatted input properly.
- * bad input is not unsafe.
- */
 ERROR fromHex(
   const unsigned char* hex,
   const int hex_length,
@@ -45,6 +41,7 @@ ERROR fromHex(
   const int raw_limit,
   OUT int* out_length
 ){
+  if((hex_length%2) != 0){return BAD_INPUT;}
   int raw_index = 0;
   for (int i = 0; i < (hex_length-1); i+=2){
 
@@ -58,5 +55,6 @@ ERROR fromHex(
     raw_index++;
 
   }
+
   return OK;
 };
