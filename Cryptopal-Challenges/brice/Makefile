@@ -23,6 +23,7 @@ CRYPTOLIB_SRC=$(wildcard src/cryptolib/*.c)
 CRYPTOLIB_OBJ=$(patsubst src/cryptolib/%.c,$(BUILD_DIR)/%.o,$(CRYPTOLIB_SRC))
 CHALLENGES_SRC=$(wildcard src/Challenges/Challenge-*.c)
 CHALLENGES_EXE=$(patsubst src/Challenges/%.c,$(BUILD_DIR)/%.exe,$(CHALLENGES_SRC))
+CHALLENGE_EXTRAS=src/cryptolib/tools/frequencies.c test/common.c
 
 TESTS_SRC=$(wildcard test/test_*.c)
 TESTS_EXE=$(patsubst test/%.c,$(TEST_DIR)/%,$(TESTS_SRC))
@@ -41,12 +42,12 @@ tests: $(TEST_DIR) $(TESTS_EXE)
 
 test : tests
 	@echo "\n============= BEGIN TESTS =============\n"
-	@find $(TEST_DIR) -name "test*" -type file -print0 | xargs -0 -n1 -I% sh -c "% && echo ''"
+	@find $(TEST_DIR) -name "test*" -type file -print0 | xargs -0 -n1 -I% sh -c "% && echo '' || exit 255"
 	@echo "\n============= END TESTS =============\n"
 
 challenges : $(CHALLENGES_EXE)
 	@echo "\n============= BEGIN CHALLENGES =============\n"
-	@find $(BUILD_DIR) -name "Challenge-*" -type file -print0 | xargs -0 -n1 -I% sh -c "% && echo ''"
+	@find $(BUILD_DIR) -name "Challenge-*" -type file -print0 | xargs -0 -n1 -I% sh -c "% && echo '' || exit 255"
 	@echo "\n============= END CHALLENGES =============\n"
 
 lib: $(BUILD_DIR)/cryptolib.a
@@ -54,7 +55,7 @@ lib: $(BUILD_DIR)/cryptolib.a
 $(TEST_DIR)/% : test/%.c test/common.c $(BUILD_DIR)/cryptolib.a
 	$(CC) $(CCOPTS) $(CFLAGS) $^ -o $@  $(LIBS) $(LDFLAGS) $(INCLUDES)
 
-$(BUILD_DIR)/Challenge-%.exe : src/Challenges/Challenge-%.c test/common.c $(BUILD_DIR)/cryptolib.a
+$(BUILD_DIR)/Challenge-%.exe : src/Challenges/Challenge-%.c $(CHALLENGE_EXTRAS) $(BUILD_DIR)/cryptolib.a
 	$(CC) $(CCOPTS) $(CFLAGS) $^ -o $@  $(LIBS) $(LDFLAGS) $(INCLUDES)
 
 $(BUILD_DIR)/cryptolib.a: $(CRYPTOLIB_OBJ)
@@ -62,6 +63,8 @@ $(BUILD_DIR)/cryptolib.a: $(CRYPTOLIB_OBJ)
 
 $(BUILD_DIR)/%.o : src/cryptolib/%.c $(BUILD_DIR)
 	$(CC) $(CCOPTS) $(CFLAGS) $< -c -o $@ $(INCLUDES)
+
+wget http://www.anc.org/MASC/download/masc_500k_texts.zip
 
 clean:
 	rm -rf $(BUILD_DIR)

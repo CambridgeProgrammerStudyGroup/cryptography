@@ -22,6 +22,9 @@ long read_to_buffer(const char* filename, unsigned char** buffer){
       fread (*buffer, 1, length, f);
     }
     fclose (f);
+  }else{
+    fprintf(stderr, "[FATAL]: File '%s' could not be opened.\n", filename);
+    exit(1);
   }
   return length;
 }

@@ -5,7 +5,6 @@
 
 #include "errors.h"
 
-
 typedef unsigned char* bytes;
 
 typedef ERROR (ENCRYPT_BLOCK)(
