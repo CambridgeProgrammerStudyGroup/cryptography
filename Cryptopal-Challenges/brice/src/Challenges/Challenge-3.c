@@ -10,6 +10,9 @@
 int main(int argc, char** args){
   printf("=== Challenge-3: Break one byte XOR cipher ===\n");
   int challenge_status = SUCCESS;
+  ERROR status = OK;
+  char* ciphertext_h = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
+  printf("Ciphertext: %s\n", ciphertext_h);
 
   /* Get the fingerprint for english */
   double english_fingerprint[256] = {0.0};
@@ -18,13 +21,12 @@ int main(int argc, char** args){
   corpus_len = read_to_buffer("./data/COLLECTED_ENGLISH_CORPUS.txt", &buffer);
   normalised_freq(buffer, corpus_len, english_fingerprint);
   printf("Read %li corpus bytes.\n", corpus_len);
+  free(buffer);
   // print_frequencies(english_fingerprint);
 
 
 
-  ERROR status = OK;
 
-  char* ciphertext_h = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
 
   int limit = 256;
   int length = 0;
@@ -57,7 +59,7 @@ int main(int argc, char** args){
   char* key = malloc(length);
   memset(key,best_candidate,length);
   xor(ciphertext, key, length, plaintext);
-  printf("Best score was %f with '0x%02x' / '%c': %s\n", best_score, best_candidate, best_candidate, plaintext);
+  printf("Best score was %f with '0x%02x'/'%c': \"%s\"\n", best_score, best_candidate, best_candidate, plaintext);
 
   free(ciphertext);
   free(plaintext);
