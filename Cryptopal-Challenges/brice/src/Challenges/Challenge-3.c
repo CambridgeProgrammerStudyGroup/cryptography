@@ -7,6 +7,17 @@
 #include "../../test/common.h"
 #include "../cryptolib/tools/frequencies.h"
 
+long get_english_fingerprint(double fingerprint[256]){
+  unsigned char* buffer = NULL;
+  long corpus_len = 0;
+  corpus_len = read_to_buffer("./data/COLLECTED_ENGLISH_CORPUS.txt", &buffer);
+  normalised_freq(buffer, corpus_len, fingerprint);
+  printf("Read %li corpus bytes.\n", corpus_len);
+  free(buffer);
+  // print_frequencies(english_fingerprint);
+  return corpus_len;
+}
+
 int main(int argc, char** args){
   printf("=== Challenge-3: Break one byte XOR cipher ===\n");
   int challenge_status = SUCCESS;
@@ -16,29 +27,19 @@ int main(int argc, char** args){
 
   /* Get the fingerprint for english */
   double english_fingerprint[256] = {0.0};
-  unsigned char* buffer = NULL;
-  long corpus_len = 0;
-  corpus_len = read_to_buffer("./data/COLLECTED_ENGLISH_CORPUS.txt", &buffer);
-  normalised_freq(buffer, corpus_len, english_fingerprint);
-  printf("Read %li corpus bytes.\n", corpus_len);
-  free(buffer);
-  // print_frequencies(english_fingerprint);
+  long corpus_len = get_english_fingerprint(english_fingerprint);
 
-
-
-
-
+  /* Get raw ciphertext */
   int limit = 256;
   int length = 0;
-  double best_score = -10.0;
-  char best_candidate = '\0';
-
   bytes ciphertext = calloc(limit, 1);
   if( OK != (status = fromHex((const bytes) ciphertext_h, strlen(ciphertext_h), ciphertext, limit, &length))){
     log_error(status); exit(1);
   };
 
-
+  /* Get best score */
+  double best_score = -10.0;
+  char best_candidate = '\0';
   for (int n = 0; n < 256; n++){
     char* key = malloc(length);
     memset(key,n,length);
@@ -55,6 +56,7 @@ int main(int argc, char** args){
     free(maybe_plaintext);
   }
 
+  /* Print the best solution out */
   bytes plaintext = calloc(limit,1);
   char* key = malloc(length);
   memset(key,best_candidate,length);
