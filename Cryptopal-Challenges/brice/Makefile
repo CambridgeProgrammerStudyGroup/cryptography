@@ -1,9 +1,9 @@
 # For OSX, Install openssl with `brew install openssl`
 
-DEBUG=false
+DEBUG=true
 CC=gcc
 
-CCOPTS= -Wno-pointer-sign
+CCOPTS= -Wno-pointer-sign -std=c11
 
 LIBS= -lssl -lcrypto
 INCLUDES= -I/usr/local/opt/openssl/include -I./src/cryptolib
@@ -11,7 +11,7 @@ LDFLAGS= -L/usr/local/opt/openssl/lib
 
 
 ifeq ($(DEBUG),true)
-    CFLAGS="-g -O0"
+    CFLAGS=-g -O0
 else
     CFLAGS=
 endif

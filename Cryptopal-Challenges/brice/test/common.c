@@ -8,6 +8,12 @@ void print_hex(const unsigned char *s){
     printf("%02x", (unsigned int) *s++);
 }
 
+void print_hex_c(const unsigned char *s, int len){
+  for(int i = 0; i <len; i++){
+    printf("%02x", (unsigned int) s[i]);
+  }
+}
+
 long read_to_buffer(const char* filename, unsigned char** buffer){
   long length = 0;
   FILE * f = fopen (filename, "rb");
