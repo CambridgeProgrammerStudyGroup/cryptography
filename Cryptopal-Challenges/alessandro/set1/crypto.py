@@ -2,7 +2,6 @@ import string
 
 HEX_VALS = list('0123456789abcdef')
 BASE64_VALS = list(string.uppercase + string.lowercase + '0123456789+/')
-LETTERS = string.uppercase + string.lowercase
 
 
 def bit(int, offset):
@@ -63,9 +62,9 @@ def xor_with_char(hex_string, char):
     return bits_to_ascii(xored)
 
 
-def count_letters(str):
+def count_textchars(str):
     count = 0
     for c in str:
-        if c in LETTERS:
+        if c in string.letters + string.whitespace:
             count += 1
     return count
