@@ -97,8 +97,12 @@ ERROR toBase64(
     out[0] = b64c[i0>>2];
     out[1] = b64c[(i0 & 0b00000011)<<4 ^ i1>>4];
     if(i+1<raw_length){
-      out[2] = b64c[(i1 & 0b00001111)<<2 ^ i2>>6];} else { out[2]='='; }
-    if(i+2<raw_length){ out[3] = b64c[i2 & 0b00111111]; } else { out[3]='='; }
+      out[2] = b64c[(i1 & 0b00001111)<<2 ^ i2>>6];
+    } else { out[2]='='; }
+
+    if(i+2<raw_length){
+      out[3] = b64c[i2 & 0b00111111];
+    } else { out[3]='='; }
 
     for(int j = 0; j < 4; j++){
         if(b64_index >= base64_limit){

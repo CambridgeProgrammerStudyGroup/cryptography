@@ -100,3 +100,17 @@
    fun:_ZN4dyld5_mainEPK12macho_headermiPPKcS5_S5_Pm
    fun:_ZN13dyldbootstrap5startEPK12macho_headeriPPKclS2_Pm
 }
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:__Balloc_D2A
+   fun:__d2b_D2A
+   fun:__dtoa
+   fun:__vfprintf
+   fun:__v2printf
+   fun:vfprintf_l
+   fun:printf
+   fun:main
+}

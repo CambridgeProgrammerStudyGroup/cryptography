@@ -68,7 +68,7 @@ Node* splitLinesFromHexIntoBytes(char* buffer, long len){
   Node* head = NULL;
   Node* current = NULL;
 
-  while(token) {
+  while(token != NULL) {
       int limit = 256;
       int length = 0;
       bytes ciphertext = calloc(limit, 1);
@@ -107,6 +107,11 @@ int main(int argc, char** args){
   unsigned char* buffer = NULL;
   long input_len = 0;
   input_len = read_to_buffer("./data/challenge-4.txt", &buffer);
+
+  if(buffer == NULL){
+    fprintf(stderr, "[FATAL]: Could not read data file!");
+    exit(1);
+  }
 
   Node* all_candidates = splitLinesFromHexIntoBytes(buffer, input_len);
 
