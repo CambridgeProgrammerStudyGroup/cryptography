@@ -45,6 +45,8 @@ def xor(first, second):
 def words_to_hex(word_string):
     return "".join([HEX_VALS[word] for word in word_string])
 
+def bits_to_hex(bit_string):
+    return "".join([HEX_VALS[bits_to_int(s)] for s in chunkify(bit_string, 4)])
 
 def bits_to_ascii(bit_string):
     return "".join([chr(bits_to_int(s)) for s in chunkify(bit_string, 8)])
