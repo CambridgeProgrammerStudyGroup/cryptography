@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
+import os
 import base64
 from collections import defaultdict
 import pprint
+
 import plotly.plotly as py
 import plotly.graph_objs as go
+
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 
 def mapKeys(d, newKey):
     return dict([(newKey(k), v) for k,v in d.items()])
@@ -14,7 +19,7 @@ def statsFrom(text):
     for c in text:
         stats[c] += 1.0
     total = sum(stats.values())
-    stats = dict(map(lambda (k, v): (k, v/total), stats.items()))
+    stats = dict(map(lambda x: (x[0], x[1]/total), stats.items()))
     return stats
 
 def getStats(filename):
@@ -62,15 +67,19 @@ def hamming(A, B):
     """
     return sum([popcount(a^b) for a,b in zip(A, B)])
 
+def vignereScore(ciphertext, keysize):
+    chunks = chunkify(ciphertext, keysize) # blocks of 16 bytes
+    pairs = zip(chunks, chunks[1:])
+    distance = sum([hamming(a,b)/float(keysize) for a,b in pairs])/float(len(pairs))
+    return distance
+
 def vignereLength(ciphertext, minv=2, maxv=50, filename=None):
     lowest_distance = 1000000
     best_length = 0
     lengths = []
     scores = []
     for ks in range(minv, maxv):
-        chunks = chunkify(ciphertext, ks)
-        pairs = zip(chunks, chunks[1:])
-        distance = sum([hamming(a,b)/float(ks) for a,b in pairs])/float(len(pairs))
+        distance = vignereScore(ks)
         lengths.append(ks)
         scores.append(distance)
         # print("size={} dist={}".format(ks, distance))
@@ -85,7 +94,7 @@ def vignereLength(ciphertext, minv=2, maxv=50, filename=None):
             )],
             layout = dict(
                 title = "Averaged Hamming distance between ciphertext blocks ",
-                xaxis = dict(title = 'Key size'),
+                xaxis = dict(title = 'Line'),
                 yaxis = dict(title = 'Hamming distance (avg)'),
              )
         )
@@ -116,3 +125,23 @@ def vignere(ciphertext, key):
     longkey = key*nkeys
     plaintext = bytearray([a^b for a,b in zip(ciphertext, longkey)])
     return str(plaintext)
+
+def AES_ECB_encrypt(key, plaintext):
+    backend = default_backend()
+    cipher = Cipher(algorithms.AES(bytes(key)), modes.ECB(), backend=backend)
+    encryptor = cipher.encryptor()
+    ct = encryptor.update(bytes(plaintext)) + encryptor.finalize()
+    return ct
+
+def AES_ECB_decrypt(key, ciphertext):
+    backend = default_backend()
+    cipher = Cipher(algorithms.AES(bytes(key)), modes.ECB(), backend=backend)
+    decryptor = cipher.decryptor()
+    pt = decryptor.update(ciphertext) + decryptor.finalize()
+    return pt
+
+def pkcs7_pad(text, blocksize):
+    if len(text)%blocksize == 0:
+        return text+bytearray([16]*16)
+    pad = blocksize - (len(text)%blocksize)
+    return text+bytearray([pad]*pad)
