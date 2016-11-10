@@ -13,7 +13,7 @@
 long get_english_fingerprint(double fingerprint[256]){
   unsigned char* buffer = NULL;
   long corpus_len = 0;
-  corpus_len = read_to_buffer("./data/COLLECTED_ENGLISH_CORPUS.txt", &buffer);
+  corpus_len = read_to_buffer("../data/COLLECTED_ENGLISH_CORPUS.txt", &buffer);
   normalised_freq(buffer, corpus_len, fingerprint);
   printf("Read %li corpus bytes.\n", corpus_len);
   free(buffer);
@@ -106,7 +106,7 @@ int main(int argc, char** args){
   /* Read in the exrcise file into a buffer */
   unsigned char* buffer = NULL;
   long input_len = 0;
-  input_len = read_to_buffer("./data/challenge-4.txt", &buffer);
+  input_len = read_to_buffer("../data/challenge-4.txt", &buffer);
 
   if(buffer == NULL){
     fprintf(stderr, "[FATAL]: Could not read data file!");

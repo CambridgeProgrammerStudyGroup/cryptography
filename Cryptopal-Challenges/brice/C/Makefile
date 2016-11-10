@@ -47,7 +47,7 @@ test : tests
 
 challenges : $(CHALLENGES_EXE)
 	@echo "\n============= BEGIN CHALLENGES =============\n"
-	@find $(BUILD_DIR) -name "Challenge-*" -type file -print0 | xargs -0 -n1 -I% sh -c "% && echo '' || exit 255"
+	@find $(BUILD_DIR) -name "Challenge-*" -type file -depth 1 -print0 | xargs -0 -n1 -I% sh -c "% && echo '' || exit 255"
 	@echo "\n============= END CHALLENGES =============\n"
 
 lib: $(BUILD_DIR)/cryptolib.a
@@ -64,7 +64,7 @@ $(BUILD_DIR)/cryptolib.a: $(CRYPTOLIB_OBJ)
 $(BUILD_DIR)/%.o : src/cryptolib/%.c $(BUILD_DIR)
 	$(CC) $(CCOPTS) $(CFLAGS) $< -c -o $@ $(INCLUDES)
 
-wget http://www.anc.org/MASC/download/masc_500k_texts.zip
+# wget http://www.anc.org/MASC/download/masc_500k_texts.zip
 
 clean:
 	rm -rf $(BUILD_DIR)
