@@ -11,6 +11,18 @@ import plotly.graph_objs as go
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 
+class Test(object):
+    def __init__(self):
+        self.plaintext = bytearray("""There was once a lamb with purple wool.
+The others in the flock thought him a fool.
+Shame for them, when easter came,
+The purple wool went to the fair
+The other lambs ended up as easter fare!
+""")
+
+TEST = Test()
+
+
 def mapKeys(d, newKey):
     return dict([(newKey(k), v) for k,v in d.items()])
 
@@ -120,6 +132,9 @@ def solveVignereN(ciphertext, N):
     # ])
     return bytearray(keybytes)
 
+def XOR(A,B, size=16):
+    return bytearray([a^b for a,b in zip(A, B)])[:size]
+
 def vignere(ciphertext, key):
     nkeys = (len(ciphertext)/len(key))+1
     longkey = key*nkeys
@@ -139,6 +154,19 @@ def AES_ECB_decrypt(key, ciphertext):
     decryptor = cipher.decryptor()
     pt = decryptor.update(ciphertext) + decryptor.finalize()
     return pt
+
+def CBC_AES_decrypt(ct, key, iv):
+    blocks = chunkify(ct, 16)
+    pass1 = [bytearray(AES_ECB_decrypt(key, b)) for b in blocks]
+    return "".join([str(XOR(a,bytearray(b))) for a,b in zip(pass1, [iv]+blocks)])
+
+def CBC_AES_encrypt(pt, key, iv):
+    blocks = chunkify(pt, 16)
+    ct = [iv]
+    for i,b in list(enumerate(blocks)):
+        nb = XOR(bytearray(ct[i]),bytearray(b))
+        ct.append(AES_ECB_encrypt(key, str(nb)))
+    return "".join([str(x) for x in ct[1:]])
 
 def pkcs7_pad(text, blocksize):
     if len(text)%blocksize == 0:
