@@ -16,14 +16,7 @@ def encryption_oracle(mode=None):
         return encrypt(KEY, pkcs7_pad(prefix+plaintext+suffix), IV)
     return encryptor
 
-def predict_mode(oracle):
-    chosen_plaintext = "A"*100
-    ciphertext = oracle(chosen_plaintext)
-    rbs = repeated_blocks(ciphertext, 16)
-    if rbs > 4:
-        return AES_ECB_encrypt
-    else:
-        return AES_CBC_encrypt
+
 
 if __name__ == "__main__":
     modes = [random.choice(ciphers) for i in range(100)]

@@ -190,3 +190,12 @@ def accuracy(predictions, actual):
         if p is actual:
             correct +=1
     return float(correct)/len(predictions)
+
+def predict_mode(oracle):
+    chosen_plaintext = "A"*100
+    ciphertext = oracle(chosen_plaintext)
+    rbs = repeated_blocks(ciphertext, 16)
+    if rbs > 4:
+        return AES_ECB_encrypt
+    else:
+        return AES_CBC_encrypt
