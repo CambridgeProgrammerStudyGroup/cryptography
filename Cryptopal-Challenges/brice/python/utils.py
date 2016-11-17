@@ -2,6 +2,7 @@
 
 import os
 import base64
+import random
 from collections import defaultdict
 import pprint
 
@@ -141,26 +142,28 @@ def vignere(ciphertext, key):
     plaintext = bytearray([a^b for a,b in zip(ciphertext, longkey)])
     return str(plaintext)
 
-def AES_ECB_encrypt(key, plaintext):
+def AES_ECB_encrypt(key, plaintext, iv=None):
     backend = default_backend()
     cipher = Cipher(algorithms.AES(bytes(key)), modes.ECB(), backend=backend)
     encryptor = cipher.encryptor()
     ct = encryptor.update(bytes(plaintext)) + encryptor.finalize()
     return ct
 
-def AES_ECB_decrypt(key, ciphertext):
+def AES_ECB_decrypt(key, ciphertext, iv=None):
     backend = default_backend()
     cipher = Cipher(algorithms.AES(bytes(key)), modes.ECB(), backend=backend)
     decryptor = cipher.decryptor()
     pt = decryptor.update(ciphertext) + decryptor.finalize()
     return pt
 
-def CBC_AES_decrypt(ct, key, iv):
+def AES_CBC_decrypt(key, ct, iv):
     blocks = chunkify(ct, 16)
     pass1 = [bytearray(AES_ECB_decrypt(key, b)) for b in blocks]
     return "".join([str(XOR(a,bytearray(b))) for a,b in zip(pass1, [iv]+blocks)])
 
-def CBC_AES_encrypt(pt, key, iv):
+def AES_CBC_encrypt(key, pt, iv):
+    if len(pt)%16 != 0:
+        raise RuntimeError("Wrong size for plaintext, not multiple of blocksize. Did you forget to pad?")
     blocks = chunkify(pt, 16)
     ct = [iv]
     for i,b in list(enumerate(blocks)):
@@ -168,8 +171,33 @@ def CBC_AES_encrypt(pt, key, iv):
         ct.append(AES_ECB_encrypt(key, str(nb)))
     return "".join([str(x) for x in ct[1:]])
 
-def pkcs7_pad(text, blocksize):
+def pkcs7_pad(text, blocksize=16):
     if len(text)%blocksize == 0:
         return text+bytearray([16]*16)
     pad = blocksize - (len(text)%blocksize)
     return text+bytearray([pad]*pad)
+
+def pkcs7_depad(text, blocksize):
+    return text[:-int(text[-1])]
+
+def randstr(size=16):
+    return str(bytearray([random.randint(0,255) for i in range(size)]))
+
+def ECB_score(text):
+    return vignereScore(bytearray(text), 16)
+
+def repeated_block_counts(text, blocksize):
+    count = defaultdict(int)
+    for block in chunkify(text, blocksize):
+        count[block] += 1
+    return sorted(count.values())
+
+def repeated_blocks(text, blocksize):
+    return max(repeated_block_counts(text, blocksize))
+
+def accuracy(predictions, actual):
+    correct = 0
+    for p, actual in zip(predictions, actual):
+        if p is actual:
+            correct +=1
+    return float(correct)/len(predictions)

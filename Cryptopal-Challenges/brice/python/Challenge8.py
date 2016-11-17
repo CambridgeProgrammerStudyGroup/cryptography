@@ -3,17 +3,6 @@ from collections import defaultdict
 
 from utils import *
 
-def ECB_score(text):
-    return vignereScore(bytearray(text), 16)
-
-def repeated_blocks(text, blocksize):
-    count = defaultdict(int)
-    for block in chunkify(text, blocksize):
-        count[block] += 1
-    return max(count.items(), key=lambda kv: kv[1])[1]
-
-
-
 if __name__ == "__main__":
     with open("../data/8.txt") as fp:
         lines = fp.readlines()
