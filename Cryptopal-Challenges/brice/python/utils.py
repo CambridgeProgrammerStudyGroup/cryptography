@@ -12,17 +12,6 @@ import plotly.graph_objs as go
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 
-class Test(object):
-    def __init__(self):
-        self.plaintext = bytearray("""There was once a lamb with purple wool.
-The others in the flock thought him a fool.
-Shame for them, when easter came,
-The purple wool went to the fair
-The other lambs ended up as easter fare!
-""")
-
-TEST = Test()
-
 
 def mapKeys(d, newKey):
     return dict([(newKey(k), v) for k,v in d.items()])
