@@ -18,6 +18,9 @@ This repository is for all the work done on Cryptography as part of the [Cambrid
  - [Cryptopals challenges](http://cryptopals.com/)
  - [Thorough speed test of common crypto libraries](https://panthema.net/2008/0714-cryptography-speedtest-comparison/) Note well, this excludes the more recent [NaCl](https://nacl.cr.yp.to/) and [NSS](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS).
 
+## Security topics
+
+- [Embedded Security Capture The Flag](https://www.microcorruption.com/login)
 
 ## Using OpenSSL from C
 
